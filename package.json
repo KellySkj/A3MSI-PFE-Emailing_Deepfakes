@@ -1,0 +1,27 @@
+{
+  "name": "pfe",
+  "version": "1.0.0",
+  "description": "PFE A3MSI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KellySkj/A3MSI-PFE-Emailing_Deepfakes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/KellySkj/A3MSI-PFE-Emailing_Deepfakes/issues"
+  },
+  "homepage": "https://github.com/KellySkj/A3MSI-PFE-Emailing_Deepfakes#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "vitest": "^5.1.0"
+  }
+}
