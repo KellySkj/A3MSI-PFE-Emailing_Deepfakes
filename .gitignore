@@ -13,3 +13,6 @@ coverage/
 
 # System files
 .DS_Store
+
+# CSV files
+*.csv
