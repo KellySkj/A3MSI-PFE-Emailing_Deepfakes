@@ -1,0 +1,4 @@
+﻿displayName,objectType,mail,userType,id,deviceId,userPrincipalName,isUser,isGroup,isGuest
+Aurélie Nass,user,,Member,bc4197c5-a24a-43c8-b242-a3a1604279cd,,aurelie.nass_esme.fr#EXT#@test1PFE.onmicrosoft.com,True,False,False
+Kelly Abendjock,user,,Member,04820107-291c-4f3d-90be-967123c7dc0f,,kelly.abendjock@test1PFE.onmicrosoft.com,True,False,False
+Lisa,user,,Member,dfdd1684-2f1f-47e1-9e2f-42ada469c8f1,,lisa.roubertie@test1PFE.onmicrosoft.com,True,False,False
