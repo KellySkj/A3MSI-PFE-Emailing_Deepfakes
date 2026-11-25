@@ -23,57 +23,58 @@ class Scenario(BaseModel):
     explication_pedagogique: str
     difficulte: str
 
+def generate_scenario(contexte):
 
-contexte = {
-    "service": "Comptabilité",
-    "fonction": "Assistant comptable",
-    "difficulte": "Très Avancée",
-    "objectif": "Reconnaître une demande urgente inhabituelle",
-}
+    prompt = f"""
+    Tu conçois des exercices de sensibilisation à la cybersécurité.
 
-prompt = f"""
-Tu conçois des exercices de sensibilisation à la cybersécurité.
+    Crée un scénario fictif de phishing par e-mail destiné
+    à une simulation autorisée dans une entreprise pilote.
 
-Crée un scénario fictif de phishing par e-mail destiné
-à une simulation autorisée dans une entreprise pilote.
+    Contexte : {json.dumps(contexte, ensure_ascii=False)}
 
-Contexte : {json.dumps(contexte, ensure_ascii=False)}
+    Contraintes :
+    - Utiliser uniquement des personnes et organisations fictives.
+    - Ne demander aucun mot de passe ni donnée personnelle réelle.
+    - Ne fournir aucun lien externe opérationnel.
+    - Rédiger en français.
+    - Inclure des indices permettant de détecter la tentative.
+    - Fournir une explication pédagogique claire.
+    """
 
-Contraintes :
-- Utiliser uniquement des personnes et organisations fictives.
-- Ne demander aucun mot de passe ni donnée personnelle réelle.
-- Ne fournir aucun lien externe opérationnel.
-- Rédiger en français.
-- Inclure des indices permettant de détecter la tentative.
-- Fournir une explication pédagogique claire.
-"""
+    debut = time.perf_counter()
 
-debut = time.perf_counter()
+    response = client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=Scenario,
+            temperature=0.7,
+        ),
+    )
 
-response = client.models.generate_content(
-    model=model,
-    contents=prompt,
-    config=types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=Scenario,
-        temperature=0.7,
-    ),
-)
+    duree = time.perf_counter() - debut
+    scenario = Scenario.model_validate_json(response.text)
+    return {'scenario': scenario.model_dump(), 'duree': duree, 'usage': response.usage_metadata}
 
-duree = time.perf_counter() - debut
-scenario = Scenario.model_validate_json(response.text)
+if __name__ == "__main__":
+    contexte_test = {
+        "service": "Comptabilité",
+        "fonction": "Assistant comptable",
+        "difficulte": "Très Avancée",
+        "objectif": "Reconnaître une demande urgente inhabituelle",
+    }
 
-print(json.dumps(
-    scenario.model_dump(),
-    ensure_ascii=False,
-    indent=2
-))
+    resultat = generate_scenario(contexte_test)
 
-usage = response.usage_metadata
+    print(json.dumps(resultat['scenario'], ensure_ascii=False, indent=2))
 
-print(f"\nDurée : {duree:.2f} secondes")
+    print(f"\nDurée : {resultat['duree']:.2f} secondes")
 
-if usage:
-    print("Tokens entrée :", usage.prompt_token_count)
-    print("Tokens sortie :", usage.candidates_token_count)
-    print("Tokens totaux :", usage.total_token_count)
+    usage = resultat['usage']
+
+    if usage:
+        print("Tokens entrée :", usage.prompt_token_count)
+        print("Tokens sortie :", usage.candidates_token_count)
+        print("Tokens totaux :", usage.total_token_count)
