@@ -1,0 +1,13 @@
+### Générer un scénario avec Gemini
+POST http://localhost:3000/emails/generate-and-send
+Content-Type: application/json
+
+{
+  "to": "lisa.roubertie@gmail.com",
+  "contexte": {
+    "service": "Comptabilité",
+    "fonction": "Assistant comptable",
+    "difficulte": "Très Avancée",
+    "objectif": "Reconnaître une demande urgente inhabituelle"
+  }
+}

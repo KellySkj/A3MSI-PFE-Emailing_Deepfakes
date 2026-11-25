@@ -1,6 +1,7 @@
 import express from "express";
 import {sendMail} from "./email/emailService.js";
 import {verifyMailer} from "./config/mailer.js";
+import {generateScenario} from "./gemini/geminiClient.js";
 
 // Création de l'application Express
 const app = express();
@@ -18,6 +19,55 @@ app.get("/health", (req, res) => {
     })
 })
 
+// essai generation de mail
+app.post("/emails/generate", async (req, res) => {
+    try {
+        const scenario = await generateScenario(req.body.contexte);
+
+        res.json({
+            message: "Scénario généré avec succès",
+            scenario
+        });
+
+    } catch (error) {
+        console.error("Erreur de génération :", error);
+
+        res.status(500).json({
+            error: "Impossible de générer le scénario"
+        });
+    }
+});
+
+// Envoi de mails générés
+app.post("/emails/generate-and-send", async (req, res) => {
+    try {
+        // 1. Générer le scénario avec Gemini
+        const scenario = await generateScenario(req.body.contexte);
+
+        // 2. Envoyer le mail avec Nodemailer
+        const info = await sendMail(
+            req.body.to,
+            scenario.objet_email,
+            scenario.corps_email
+        );
+
+        // 3. Retourner le résultat
+        res.json({
+            message: "Scénario généré et email envoyé avec succès",
+            messageId: info.messageId,
+            scenario: scenario
+        });
+
+    } catch (error) {
+        console.error("Erreur lors de la génération ou de l'envoi :", error);
+
+        res.status(500).json({
+            error: "Impossible de générer ou envoyer le mail"
+        });
+    }
+});
+
+// envoi de mails test
 app.post("/emails/send", async (req, res) => {
     try {
         const info = await sendMail(
