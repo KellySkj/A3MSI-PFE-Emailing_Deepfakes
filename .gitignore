@@ -16,3 +16,8 @@ coverage/
 
 # CSV files
 *.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
