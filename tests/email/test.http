@@ -1,0 +1,8 @@
+POST http://localhost:3000/emails/send
+Content-Type: application/json
+
+{
+  "to": "lisa.roubertie@gmail.com",
+  "subject": "Test Nodemailer",
+  "content": "test avec nodemailer."
+}
