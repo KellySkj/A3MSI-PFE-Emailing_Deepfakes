@@ -1,0 +1,7 @@
+### Générer un scénario à partir des données AD
+POST http://localhost:3000/emails/generate
+Content-Type: application/json
+
+{
+  "service": "Comptabilite"
+}

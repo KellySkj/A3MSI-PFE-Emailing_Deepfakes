@@ -1,0 +1,6 @@
+POST http://localhost:3000/emails/generate-and-send
+Content-Type: application/json
+
+{
+  "service": "Comptabilite"
+}

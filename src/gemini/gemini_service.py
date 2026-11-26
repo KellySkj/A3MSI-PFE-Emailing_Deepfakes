@@ -27,34 +27,70 @@ class Scenario(BaseModel):
 def generate_scenario(contexte):
 
     prompt = f"""
-    Tu conçois des exercices de sensibilisation à la cybersécurité.
+    Tu conçois des exercices avancés de sensibilisation à la cybersécurité.
 
     Crée un scénario fictif de phishing par e-mail destiné
     à une simulation autorisée dans une entreprise pilote.
 
-    Contexte : {json.dumps(contexte, ensure_ascii=False)}
+    Contexte professionnel :
+    {json.dumps(contexte, ensure_ascii=False)}
 
-    Contraintes :
+    Le scénario doit être pertinent pour l'ensemble des postes
+    représentés dans ce service.
+    Ne suppose pas que tous les destinataires ont les mêmes
+    responsabilités.
+
+    OBJECTIF : DIFFICULTÉ TRÈS AVANCÉE
+
+    Le scénario doit être réaliste et subtil.
+    Il doit pouvoir sembler crédible lors d'une première lecture,
+    sans contenir de signes caricaturaux de phishing.
+
+    Contraintes rédactionnelles :
+    - Rédiger en français naturel et professionnel.
+    - Adapter le prétexte au service et aux postes concernés.
+    - Utiliser un contexte de travail plausible et cohérent.
+    - Employer un ton professionnel, sans fautes volontaires.
+    - Éviter les formulations excessivement alarmistes.
+    - Ne pas utiliser systématiquement une échéance urgente.
+    - Éviter les signatures volontairement génériques ou suspectes.
+    - Ne pas rendre les indices de détection trop évidents.
+    - Ne pas inventer de procédures internes présentées comme réelles.
+    - Le mail doit être adressé à une seule personne.
+    - Commencer obligatoirement le corps du mail par "Bonjour {{PRENOM}},"
+    - Ne jamais utiliser "Bonjour à toute l'équipe" ou une formule collective.
+    - Conserver exactement le placeholder {{PRENOM}} dans le corps du mail.
+    - Reprendre exactement ce même placeholder dans la version HTML.
+    - Relire l'explication pédagogique pour éviter les erreurs de français.
+    - Ne pas utiliser de termes incohérents avec le contexte professionnel.
+
+    Contraintes de sécurité :
     - Utiliser uniquement des personnes et organisations fictives.
-    - Ne demander aucun mot de passe ni donnée personnelle réelle.
-    - Ne fournir aucun lien externe opérationnel.
-    - Rédiger en français.
-    - Inclure des indices permettant de détecter la tentative.
-    - Fournir une explication pédagogique claire.
+    - Ne demander aucun mot de passe, identifiant ou donnée personnelle.
+    - Ne demander aucun paiement, virement ou changement de coordonnées bancaires.
+    - Ne générer aucune URL, aucun lien cliquable ni domaine externe.
+    - Ne créer aucun formulaire ou mécanisme de collecte.
+    - Si une action est proposée, elle doit rester simulée et sans effet réel.
 
-    - Générer également une version HTML professionnelle et
-      visuellement crédible du corps du mail.
-    - Conserver exactement le même contenu et le même sens que
-      dans corps_email.
-    - Adapter la présentation au service et au contexte de
-      l'entreprise.
-    - Utiliser une mise en page responsive, avec du CSS inline.
-    - Utiliser uniquement des éléments HTML compatibles avec
-      les clients de messagerie.
-    - Ne pas utiliser de JavaScript ni de ressources externes.
-    - Ne pas ajouter de liens opérationnels, de formulaires
-      ou de collecte d'identifiants.
-    - Retourner ce contenu dans le champ html_email.
+    Contenu pédagogique :
+    - Inclure plusieurs indices suspects, mais discrets.
+    - Les indices doivent être cohérents avec le scénario.
+    - Expliquer précisément pourquoi ils doivent éveiller les soupçons.
+    - Ne pas révéler les indices dans le corps du mail.
+
+    Version HTML :
+    - Générer une version HTML professionnelle du corps du mail.
+    - Conserver exactement le même contenu et le même sens.
+    - Utiliser du CSS inline et une mise en page responsive.
+    - Utiliser uniquement des éléments compatibles avec les clients mail.
+    - Ne pas utiliser JavaScript, de ressources externes ou de liens.
+    - Ne pas utiliser de balise <a>.
+
+    Difficulté :
+    - Le champ difficulte doit obligatoirement être :
+      "Très avancée"
+
+    Retourner uniquement les champs définis dans le schéma Scenario.
     """
 
     debut = time.perf_counter()
@@ -75,10 +111,15 @@ def generate_scenario(contexte):
 
 if __name__ == "__main__":
     contexte_test = {
-        "service": "Comptabilité",
-        "fonction": "Assistant comptable",
-        "difficulte": "Très Avancée",
-        "objectif": "Reconnaître une demande urgente inhabituelle",
+        "service": "Comptabilite",
+        "postes": [
+            "Assistant comptable",
+            "Assistante comptable",
+            "Comptable",
+            "Responsable comptable"
+        ],
+        "difficulte": "Avancee",
+        "objectif": "Reconnaître une demande inhabituelle urgente"
     }
 
     resultat = generate_scenario(contexte_test)

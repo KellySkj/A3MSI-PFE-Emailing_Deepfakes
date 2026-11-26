@@ -21,3 +21,6 @@ coverage/
 __pycache__/
 *.py[cod]
 *.pyo
+
+# base de données
+*.db
