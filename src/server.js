@@ -48,7 +48,8 @@ app.post("/emails/generate-and-send", async (req, res) => {
         const info = await sendMail(
             req.body.to,
             scenario.objet_email,
-            scenario.corps_email
+            scenario.corps_email,
+            scenario.html_email
         );
 
         // 3. Retourner le résultat
