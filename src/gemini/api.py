@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import Any
 
 from .gemini_service import generate_scenario
-from ..data.database import get_service_contexts, get_employees_by_service
+from ..data.employees import get_service_contexts, get_employees_by_service
 
 app = FastAPI()
 

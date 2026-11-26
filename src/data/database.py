@@ -11,8 +11,15 @@ DATA_DIR = Path(__file__).resolve().parent
 DB_PATH = DATA_DIR / "pfe.db"
 
 
+def get_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        return conn
+
+
 def create_database():
-    with sqlite3.connect(DB_PATH) as conn:
+    with get_connection() as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,126 +34,54 @@ def create_database():
             )
         """)
 
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS campaigns (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                service TEXT NOT NULL,
+                scenario_json TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                status TEXT NOT NULL DEFAULT 'draft'
+            )
+        """)
 
-def import_employees():
-    with sqlite3.connect(DB_PATH) as conn:
-        with open(DATA_DIR / "fake_ad_export.csv", "r", encoding="utf-8-sig", newline="") as file:
-            reader = csv.DictReader(file)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS campaign_recipients (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                campaign_id INTEGER NOT NULL,
+                employee_id INTEGER NOT NULL,
+                tracking_token TEXT NOT NULL UNIQUE,
+                email_status TEXT NOT NULL DEFAULT 'pending',
+                sent_at TEXT,
 
-            for row in reader:
-                conn.execute("""
-                    INSERT INTO employees (
-                        object_id, prenom, nom, email,
-                        service, poste, manager_object_id, actif
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT(object_id) DO NOTHING
-                """, (
-                    row["object_id"],
-                    row["prenom"],
-                    row["nom"],
-                    row["email"],
-                    row["service"],
-                    row["poste"],
-                    row["manager_object_id"] or None,
-                    1 if row["actif"].lower() == "true" else 0
-                ))
+                FOREIGN KEY (campaign_id)
+                    REFERENCES campaigns(id)
+                    ON DELETE CASCADE,
 
+                FOREIGN KEY (employee_id)
+                    REFERENCES employees(id),
 
-def count_employees():
-    with sqlite3.connect(DB_PATH) as conn:
-        result = conn.execute("SELECT COUNT(*) FROM employees")
-        return result.fetchone()[0]
+                UNIQUE (campaign_id, employee_id)
+            )
+        """)
 
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS tracking_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                recipient_id INTEGER NOT NULL,
+                event_type TEXT NOT NULL,
+                event_count INTEGER NOT NULL DEFAULT 0,
+                first_event_at TEXT,
+                last_event_at TEXT,
 
-def get_employee_groups():
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
+                FOREIGN KEY (recipient_id)
+                    REFERENCES campaign_recipients(id)
+                    ON DELETE CASCADE,
 
-        groups = conn.execute("""
-            SELECT service, COUNT(*) AS employee_count
-            FROM employees
-            WHERE actif = 1
-            GROUP BY service
-            ORDER BY service
-        """).fetchall()
-
-        return [dict(group) for group in groups]
-
-
-def get_employees_by_service():
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-
-        employees = conn.execute("""
-            SELECT object_id, prenom, email, service, poste
-            FROM employees
-            WHERE actif = 1
-            ORDER BY service, nom
-        """).fetchall()
-
-        groups = {}
-
-        for employee in employees:
-            service = employee["service"]
-
-            if service not in groups:
-                groups[service] = []
-
-            groups[service].append(dict(employee))
-
-        return groups
-
-
-def get_service_contexts():
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-
-        employees = conn.execute("""
-            SELECT service, poste
-            FROM employees
-            WHERE actif = 1
-            ORDER BY service, poste
-        """).fetchall()
-
-        contexts = {}
-
-        for employee in employees:
-            service = employee["service"]
-            poste = employee["poste"]
-
-            if service not in contexts:
-                contexts[service] = {
-                    "service": service,
-                    "nombre_employes": 0,
-                    "postes": set()
-                }
-
-            contexts[service]["nombre_employes"] += 1
-            contexts[service]["postes"].add(poste)
-
-        # Conversion des ensembles en listes
-        for context in contexts.values():
-            context["postes"] = sorted(context["postes"])
-
-        return contexts
+                UNIQUE (recipient_id, event_type)
+            )
+        """)
 
 
 if __name__ == "__main__":
+
     create_database()
-    import_employees()
-    print(f"Base de données créée : {DB_PATH}")
-    print(f"Nombre d'employés : {count_employees()}")
-    for group in get_employee_groups():
-            print(group)
-
-    groups = get_employees_by_service()
-    for service, employees in groups.items():
-        print(f"\n{service} : {len(employees)} employés")
-        for employee in employees:
-            print(f" - {employee['prenom']} ({employee['poste']})")
-
-    print("\n--- CONTEXTES POUR GEMINI ---")
-    contexts = get_service_contexts()
-    for service, context in contexts.items():
-        print(context)
